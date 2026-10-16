@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>e-Procurement GST Automation – Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">eP</div>
+    <div>
+      <div class="title">e-Procurement Portal · GST Invoice &amp; GSTR-1 Automation</div>
+      <div class="subtitle">Prototype · all taxpayer data is fictitious · mediator & GSTN are simulated</div>
+    </div>
+  </div>
+  <div class="supplier" id="supplierBox"></div>
+</header>
+
+<nav class="flow" id="flow">
+  <button data-tab="vendors" data-step="1"><b>1</b>Vendor Registration</button>
+  <button data-tab="vendors" data-step="2"><b>2</b>Capture &amp; Verify GSTIN</button>
+  <button data-tab="payments" data-step="3"><b>3</b>Vendor Pays Fee</button>
+  <button data-tab="invoices" data-step="4"><b>4</b>Instant GST Invoice</button>
+  <button data-tab="filing" data-step="5"><b>5</b>Monthly Batch</button>
+  <button data-tab="filing" data-step="6"><b>6</b>GSTR-1 via Mediator</button>
+  <button data-tab="itc" data-step="7"><b>7</b>ITC in GSTR-2B</button>
+</nav>
+
+<div class="layout">
+  <main>
+    <section class="tab" id="tab-dashboard">
+      <div class="kpis" id="kpis"></div>
+      <div class="card">
+        <h2>How this prototype works</h2>
+        <ol class="howto">
+          <li><b>Vendors</b> – register a vendor with GSTIN. The portal validates the check digit offline, then calls the mediator's <code>GSTIN search</code> API and stores the GSTN legal name, state and status. Click <i>Load sample vendors</i> for a quick start.</li>
+          <li><b>Payments</b> – the vendor pays corpus fund, documentation, process and transaction fee. Only the transaction fee attracts 18% GST. A Rule&nbsp;46 compliant tax invoice is issued <i>instantly</i> (like Uber / Zomato) — B2B if the GSTIN is active, B2C otherwise.</li>
+          <li><b>Bulk simulate</b> – generate thousands (up to 2 lakh) of payments for a month to test the 1.5 lakh / month volume.</li>
+          <li><b>GSTR-1 Filing</b> – build the monthly batch (b2b, b2cs, hsn, doc_issue), connect to GSTN via OTP, upload in parts, review the GSTN summary and file with EVC → ARN.</li>
+          <li><b>Vendor ITC</b> – see the vendor-side GSTR-2B: every invoice now appears as eligible ITC.</li>
+        </ol>
+        <p class="muted">Demo OTP for the simulated GSTN: <b>575757</b>. The right-hand panel shows every API call the portal makes to the mediator.</p>
+        <div class="row">
+          <button class="btn" data-goto="vendors">Start: Register vendors →</button>
+          <button class="btn ghost danger" id="resetBtn">Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-vendors" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Register vendor</h2>
+          <form id="vendorForm" class="form">
+            <label>GSTIN <span class="muted">(optional – without it the invoice is B2C and no ITC flows)</span>
+              <div class="inline">
+                <input name="gstin" id="gstinInput" maxlength="15" placeholder="37AAECK1234F1Z?" autocomplete="off">
+                <span class="badge" id="gstinCheck"></span>
+              </div>
+            </label>
+            <label>Vendor / firm name<input name="legalName" required placeholder="Auto-filled from GSTN after verification"></label>
+            <div class="grid2 tight">
+              <label>Email<input name="email" type="email" placeholder="accounts@vendor.example.com"></label>
+              <label>Mobile<input name="mobile" placeholder="98xxxxxxxx"></label>
+            </div>
+            <label>Address<input name="address" placeholder="Used only when GSTN address is unavailable"></label>
+            <div class="row">
+              <button class="btn" type="submit">Verify GSTIN &amp; Register</button>
+              <button class="btn ghost" type="button" id="loadSamples">Load sample vendors</button>
+            </div>
+            <div id="vendorMsg" class="msg"></div>
+          </form>
+          <details class="samples"><summary>Sample GSTINs in the mock GSTN registry</summary><div id="sampleList"></div></details>
+        </div>
+        <div class="card">
+          <h2>Registered vendors <span class="count" id="vendorCount"></span></h2>
+          <div class="tablewrap"><table id="vendorTable"><thead><tr><th>ID</th><th>Vendor (GSTN legal name)</th><th>GSTIN</th><th>Status</th><th>State</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-payments" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Tender fee payment</h2>
+          <form id="payForm" class="form">
+            <label>Vendor<select name="vendorId" id="paySelect" required></select></label>
+            <div class="grid2 tight">
+              <label>Tender ID<input name="tenderId" placeholder="auto"></label>
+              <label>Tender title<input name="tenderTitle" value="Construction of CC road – Phase II"></label>
+            </div>
+            <div class="feegrid">
+              <label>Transaction fee <span class="tag gst">GST 18%</span><input name="transactionFee" type="number" min="1" step="0.01" value="5000"></label>
+              <label>Corpus fund <span class="tag">No GST</span><input name="corpusFund" type="number" min="0" step="0.01" value="0"></label>
+              <label>Documentation fee <span class="tag">No GST</span><input name="documentationFee" type="number" min="0" step="0.01" value="1000"></label>
+              <label>Process fee <span class="tag">No GST</span><input name="processFee" type="number" min="0" step="0.01" value="500"></label>
+            </div>
+            <div class="preview" id="payPreview"></div>
+            <button class="btn" type="submit">Pay (simulated gateway) &amp; issue invoice</button>
+            <div id="payMsg" class="msg"></div>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Bulk simulation (volume test)</h2>
+          <p class="muted">Generates payments spread across the month for registered vendors (≈8% to unregistered vendors → B2C). Use 150000 to test the real monthly volume.</p>
+          <form id="simForm" class="form">
+            <div class="grid2 tight">
+              <label>Return period (MMYYYY)<input name="period" id="simPeriod" pattern="\d{6}" required></label>
+              <label>No. of payments<input name="count" type="number" min="1" max="200000" value="5000"></label>
+            </div>
+            <button class="btn ghost" type="submit">Generate payments</button>
+            <div id="simMsg" class="msg"></div>
+          </form>
+          <h3>Recent payments</h3>
+          <div class="tablewrap"><table id="payTable"><thead><tr><th>Payment</th><th>Vendor</th><th>Txn fee</th><th>GST</th><th>Total paid</th><th></th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-invoices" hidden>
+      <div class="card">
+        <div class="row between">
+          <h2>Tax invoices <span class="count" id="invCount"></span></h2>
+          <div class="row">
+            <select id="invPeriod"></select>
+            <input id="invSearch" placeholder="Search invoice no / GSTIN / name">
+          </div>
+        </div>
+        <div class="tablewrap"><table id="invTable"><thead><tr><th>Invoice No</th><th>Date</th><th>Type</th><th>Recipient</th><th>GSTIN</th><th>POS</th><th class="num">Taxable</th><th class="num">IGST</th><th class="num">CGST</th><th class="num">SGST</th><th class="num">Total</th><th>GSTR-1</th><th></th></tr></thead><tbody></tbody></table></div>
+        <p class="muted">Showing latest 100. Each invoice opens as a printable / PDF-able tax invoice.</p>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-filing" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Monthly GSTR-1 batch</h2>
+          <form id="batchForm" class="form">
+            <label>Return period<select name="period" id="batchPeriod"></select></label>
+            <button class="btn" type="submit">Create batch from pending invoices</button>
+            <div id="batchMsg" class="msg"></div>
+          </form>
+          <h3>Batches</h3>
+          <div id="batchList" class="batchlist"></div>
+        </div>
+        <div class="card" id="batchDetail"><p class="muted">Create or select a batch.</p></div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-itc" hidden>
+      <div class="card">
+        <h2>Vendor view – GSTR-2B (simulated GSTN)</h2>
+        <p class="muted">In real life the vendor sees this in their own GST login / IMS. Here we query the simulated GSTN to prove the ITC has flowed.</p>
+        <form id="itcForm" class="row">
+          <select id="itcVendor"></select>
+          <select id="itcPeriod"></select>
+          <button class="btn" type="submit">Fetch GSTR-2B</button>
+        </form>
+        <div id="itcResult"></div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="apilog">
+    <div class="row between"><h3>Mediator API calls</h3><span class="muted small" id="mediatorName"></span></div>
+    <div id="apiLog"></div>
+  </aside>
+</div>
+
+<footer class="foot">Prototype for evaluation only · Integration pattern: Portal → GSP/ASP mediator (e.g. Quicko) → GSTN · See <code>docs/GST_Integration_Solution.md</code></footer>
+<script src="app.js"></script>
+</body>
+</html>

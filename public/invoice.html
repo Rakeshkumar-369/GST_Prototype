@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tax Invoice</title>
+  <style>
+    :root { --ink: #1b2433; --muted: #66728a; --line: #d9dfe8; --navy: #0f2d52; --brand: #0b6e8a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eef1f6; font: 13px/1.45 "Segoe UI", system-ui, Roboto, Arial, sans-serif; color: var(--ink); }
+    .bar { max-width: 860px; margin: 16px auto 0; display: flex; gap: 8px; justify-content: flex-end; }
+    .bar button { background: var(--brand); color: #fff; border: 0; padding: 8px 14px; border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; }
+    .bar button.ghost { background: #fff; color: var(--brand); border: 1px solid var(--brand); }
+    .sheet { max-width: 860px; margin: 12px auto 40px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 28px 32px; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid var(--navy); padding-bottom: 14px; }
+    .head h1 { margin: 0; font-size: 22px; color: var(--navy); letter-spacing: .5px; }
+    .orig { font-size: 11px; color: var(--muted); }
+    .sup .name { font-size: 16px; font-weight: 700; }
+    .mono { font-family: ui-monospace, Consolas, monospace; }
+    .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 8px; margin: 16px 0; }
+    .grid > div { padding: 10px 14px; }
+    .grid > div + div { border-left: 1px solid var(--line); }
+    .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+    .kv { display: grid; grid-template-columns: 150px 1fr; gap: 2px 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    th { background: #f3f6fa; font-size: 11px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px; border: 1px solid var(--line); }
+    td { padding: 8px; border: 1px solid var(--line); vertical-align: top; }
+    .num { text-align: right; white-space: nowrap; }
+    .totals { display: flex; justify-content: space-between; gap: 20px; margin-top: 14px; }
+    .totals table { width: 330px; } .totals td { border: 0; border-bottom: 1px solid #eef1f5; padding: 5px 8px; }
+    .totals tr.grand td { font-size: 16px; font-weight: 700; border-top: 2px solid var(--navy); color: var(--navy); }
+    .words { font-style: italic; margin-top: 6px; }
+    .qrbox { display: flex; gap: 14px; align-items: center; }
+    #qr { width: 120px; height: 120px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 10px; color: var(--muted); text-align: center; padding: 4px; }
+    #qr svg { width: 110px; height: 110px; }
+    .itc { margin-top: 16px; padding: 10px 14px; border-radius: 8px; background: #e5f5ec; color: #137a43; }
+    .itc.b2c { background: #fff4dc; color: #9a6300; }
+    .fees { margin-top: 16px; font-size: 12px; }
+    .foot { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; font-size: 11px; color: var(--muted); }
+    .sign { text-align: right; } .sign .box { display: inline-block; border: 1px dashed #9fb3c8; padding: 6px 10px; border-radius: 6px; color: #137a43; font-size: 11px; }
+    .stamp { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: #eef1f6; }
+    @media print { body { background: #fff; } .bar { display: none; } .sheet { border: 0; margin: 0; max-width: none; padding: 0; } }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } .grid > div + div { border-left: 0; border-top: 1px solid var(--line); } .totals { flex-direction: column; } .sheet { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="bar"><button class="ghost" onclick="history.length > 1 ? history.back() : window.close()">← Back</button><button onclick="window.print()">Download PDF / Print</button></div>
+  <div class="sheet" id="sheet"><p class="muted">Loading invoice…</p></div>
+  <script src="vendor/qrcode.js"></script>
+  <script src="invoice.js"></script>
+</body>
+</html>

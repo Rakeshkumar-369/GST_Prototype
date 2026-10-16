@@ -1,0 +1,14 @@
+{
+  "name": "eproc-gst-integration-prototype",
+  "version": "1.0.0",
+  "description": "Prototype: instant GST invoices for e-Procurement transaction fees and automated monthly GSTR-1 filing through a GSP/ASP mediator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scripts/e2e.js"
+  },
+  "engines": { "node": ">=18" },
+  "author": "Rakeshkumar-369 <k.rakeshkumar369@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true
+}
